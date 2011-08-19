@@ -10,6 +10,7 @@ define('INSTALLER_VERSION', '1.00');
 define('INSTALLER_FILE', basename(__FILE__));
 
 define('PRODUCT_NAME', 'Quick Homepage Maker Professional');
+define('PRODUCT_JNAME', 'QHMプロ');
 define('PRODUCT_CODENAME', 'qhmpro');
 define('PRODUCT_INSTALL_SYSTEM', 'https://ensmall.net/p/qhmpro/sys/');
 
@@ -704,7 +705,7 @@ function delete_files($mode, $ens, $fm, $codename='')
 			flush2($file, $cnt, $sum);
 		}
 		
-		if ($codename != "")
+		if ($codename == "")
 		{
 			// 利用規約の削除
 			$fm->delete_file(DESCRIPTION_FILE);
@@ -718,7 +719,7 @@ function delete_files($mode, $ens, $fm, $codename='')
 			$fm->delete_dir($curdir.'/'.$file.'/');
 			flush2($file, $cnt, $sum);
 		}
-		
+
 		// インストール回数をカウントアップ
 		$pid = ($codename == '') ? '' : $ens->addons[$codename]['id'];
 		$ens->install_log($mode, $fm->server, $pid);
@@ -1066,9 +1067,14 @@ function agreeCheck(obj)
 <p class="submit2"><label><input type="submit" name="restore" tabindex="4" value="システムの修復" /></label>
 <label><input type="submit" name="uninstall" tabindex="5" value="アンインストール" class="conf_uninstall" /></label></p>
 
-<?php 	else : ?>
-
-<p class="submit"><label><input type="submit" name="restore" tabindex="4" value="システムの修復" style="float:none" /></label></p>
+<?php 	else : 
+	$restore_name = 'システムの修復';
+	if ($ens->isQHMTry || $ens->isOpenQHM || $ens->isQHMLite || $ens->isACCafe)
+	{
+		$restore_name = PRODUCT_JNAME.'へ移行する';
+	}
+?>
+<p class="submit"><label><input type="submit" name="restore" tabindex="4" value="<?php echo $restore_name?>" style="float:none" /></label></p>
 <p class="submit2"><label><input type="submit" name="uninstall" tabindex="5" value="アンインストール" class="conf_uninstall" /></label></p>
 
 <?php 	endif; ?>
@@ -1078,7 +1084,8 @@ function agreeCheck(obj)
 <?php	if (count($ens->addons) > 0) : ?>
 <hr />
 
-<?php		foreach($ens->addons as $cdname => $row) : ?>
+<?php		foreach($ens->addons as $cdname => $row) : 
+				if ($row['installed']) : ?>
 
 <form id="ExecuteForm2" method="post" action="<?php echo INSTALLER_FILE ?>">
 
@@ -1087,7 +1094,7 @@ function agreeCheck(obj)
 <input type="hidden" name="addon_jname" value="<?php echo h($row['name']); ?>">
 
 </form>
-
+<?php 			endif; ?>
 <?php 		endforeach; ?>
 <?php	endif; ?>
 

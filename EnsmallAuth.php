@@ -34,9 +34,11 @@ class EnsmallAuth {
 	var $isNew = FALSE;
 	var $doRestore = FALSE;
 	// ! need change by product ----- 
+	var $isQHMTry  = FALSE;
 	var $isOpenQHM = FALSE;
 	var $isQHMLite = FALSE;
-	var $isACCafe = FALSE;
+	var $isACCafe  = FALSE;
+	var $hasQDesigner = FALSE;
 	// ------------------------------
 
 	/* tryinfo */
@@ -607,16 +609,16 @@ class EnsmallAuth {
 	 *
 	 *   @return boolean 成功
 	 */
-	function install_log($status, $server='', $pid='')
+	function install_log($status, $server='localhost', $pid='')
 	{
 		$url = ENSMALL_CLUB_URL.'product_installs/install_log/__UID__/__PID__/__SERVER__/__STATUS__/d41da6ce50bdf4e458514e8d4a195e63/';
 		$search = array('__UID__', '__PID__', '__SERVER__', '__STATUS__');
+		
 		$server = str_replace('/', '\\', $server); //cakephpによって、%2Fが、/ と認識されてうまく動作しないから
 		$pid = ($pid == '') ? $this->product_id : $pid;
 
 		$rep = array($this->user_id, $pid, rawurlencode($server), rawurlencode($status));
 		$url = str_replace($search, $rep, $url);
-
 		$req_data = array('method'=>'POST', 'post'=>array('url'=>$this->install_url));
 		if ($this->use_proxy)
 		{
@@ -943,7 +945,17 @@ class EnsmallAuth {
 				{
 					$hasFwd3 = TRUE;
 				}
-				
+
+				// 体験版チェック
+				if (file_exists('./lib/qhm_init.php')) {
+					//qhm_init に体験版限定関数が定義されている
+					$qinitstr = file_get_contents('./lib/qhm_init.php');
+					if (preg_match('/function rmdir_all/', $qinitstr)) {
+						$this->isQHMTry = TRUE;
+						$this->doRestore = TRUE;
+					}
+				}
+
 				// Open QHMチェック：default.ini.php に other_plugin を持たない
 				$fpath = './default.ini.php';
 				if (file_exists($fpath))
@@ -969,9 +981,11 @@ class EnsmallAuth {
 					}
 					$this->doRestore = TRUE;
 				}
+				
 			}
 		}
-
+		
+		$this->_checkAddon();
 		$this->saveProps();
 
 		return TRUE;
@@ -1002,4 +1016,30 @@ class EnsmallAuth {
 			}
 		}
 	}
+	
+
+	// ----------------------------------------------------------------------------
+	
+	/**
+	 *   アドオンチェック
+	 *   ! need change by product
+	 *
+ 	 * @param
+	 * @return
+	 */
+	function _checkAddon()
+	{
+		foreach ($this->addons as $key => $row)
+		{
+			if (is_dir($row['dir']))
+			{
+				$this->addons['installed'] = TRUE;
+			}
+			else
+			{
+				$this->addons['installed'] = FALSE;
+			}
+		}
+	}
+	
 }

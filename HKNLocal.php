@@ -23,7 +23,7 @@
 
 class HKN_Local{
 	
-	var $server = '';
+	var $server = 'localhost';
 	var $errmsg = '';
 	
 	/**
