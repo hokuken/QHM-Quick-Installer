@@ -111,7 +111,9 @@ if (isset($_POST['club_login']))
 			$viewfunc = 'view_confirm';
 		}
 	}
-	else {
+	else
+	{
+		$vdata['email'] = $email;
 		$vdata['error'] = $ens->errmsg;
 		$viewfunc = 'view_club_login';
 	}
@@ -350,8 +352,7 @@ else if (isset($_POST['set_admin']))
 				go_link('install.php?complete&mode=install'); // 完了画面へ
 			}
 		}
-		
-		if ($error != '')
+		else
 		{
 			$vdata['error'] = $error;
 			$vdata['email'] = $ens->get_email();
@@ -443,6 +444,7 @@ else
 		$warning = 'safe_mode が on になっています<br />制限が多いため、正常に動作しない可能性があります';
 	}
 
+	$vdata['email'] = '';
 	$vdata['error'] = $error;
 	$vdata['warning'] = $warning;
 	$_SESSION['is_editable'] = $pc->is_editable();
@@ -872,7 +874,7 @@ $(document).ready(function(){
 <?php endif; ?>
 
 <p class="input"><label>メールアドレス<br />
-<input name="email" type="text" size="30" tabindex="1" maxlength="128" value="" id="email" />
+<input name="email" type="text" size="30" tabindex="1" maxlength="128" value="<?php echo $email?>" id="email" />
 </label></p>
 
 <p class="input"><label>パスワード<br />
@@ -1126,7 +1128,7 @@ function view_do_now($vdata)
 	extract($vdata);
 ?>
 <!-- do now start -->
-<p class="message display">サーバーの通信速度によっては、この作業にしばらく時間がかかります。<br />ウィンドウを閉じずにこのままでお待ちください。</p>
+<p class="message display">サーバーの通信速度によっては、この作業にしばらく時間がかかります。<br />ウィンドウを閉じずにこのままお待ちください。</p>
 <div id="process">
 
 <p>実行中です...</p>
