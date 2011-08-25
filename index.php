@@ -90,25 +90,26 @@ if (isset($_POST['club_login']))
 	$res = $ens->auth($email, $password);
 	if ($res === ENSMALL_STATUS_SUCCESS && $ens->check_product())
 	{
-		// need ftp login
-		if ( ! $_SESSION['is_editable'])
+		if ($ens->isNew())
 		{
-			if ($ens->isNew()) {
+			if ( ! $_SESSION['is_editable'])
+			{
 				$vdata['ftp_type'] = 'default';
 				$viewfunc = 'view_ftp_login';
 			}
-			else {
-				// Update or Uninstall or Reset Password
-				$viewfunc = 'view_admin_login';
+			else
+			{
+				// confirm
+				$fm = get_uploader();
+				check_installer($ens, $fm);
+				$vdata['ens'] = $ens;
+				$viewfunc = 'view_confirm';
 			}
 		}
-		else 
+		else
 		{
-			// confirm
-			$fm = get_uploader();
-			check_installer($ens, $fm);
-			$vdata['ens'] = $ens;
-			$viewfunc = 'view_confirm';
+			// Update or Uninstall or Reset Password
+			$viewfunc = 'view_admin_login';
 		}
 	}
 	else
@@ -189,32 +190,43 @@ else if (isset($_POST['admin_login']))
 	}
 	else
 	{
-		$ftp_info = $fm->decrypt_ftp($username.$password, explode(',', $encrypt_ftp));
-	
-		// FTP login
-		if ($fm->connect($ftp_info))
+		if ( ! $_SESSION['is_editable'])
 		{
-			if ($fm->serverTest())
+			$ftp_info = $fm->decrypt_ftp($username.$password, explode(',', $encrypt_ftp));
+		
+			// FTP login
+			if ($fm->connect($ftp_info))
 			{
-				$fm->saveProps();
-				check_installer($ens, $fm);
-				$vdata['ens'] = $ens;
-				$viewfunc = 'view_confirm';
+				if ($fm->serverTest())
+				{
+					$fm->saveProps();
+					check_installer($ens, $fm);
+					$vdata['ens'] = $ens;
+					$viewfunc = 'view_confirm';
+				}
+				else
+				{
+					// invalid dir
+					$vdata['ftp_type'] = 'full';
+					$vdata['error'] = $fm->errmsg;
+					$viewfunc = 'view_ftp_login';
+				}
 			}
 			else
 			{
-				// invalid dir
-				$vdata['ftp_type'] = 'full';
+				// cannot connect
+				$vdata['ftp_type'] = 'default';
 				$vdata['error'] = $fm->errmsg;
 				$viewfunc = 'view_ftp_login';
 			}
 		}
 		else
 		{
-			// cannot connect
-			$vdata['ftp_type'] = 'default';
-			$vdata['error'] = $fm->errmsg;
-			$viewfunc = 'view_ftp_login';
+			// confirm
+			$fm = get_uploader();
+			check_installer($ens, $fm);
+			$vdata['ens'] = $ens;
+			$viewfunc = 'view_confirm';
 		}
 	}
 }
@@ -531,6 +543,7 @@ function check_installer($ens, $fm)
 			$error = 'インストーラーをアップロードできませんでした';
 		}
 	}
+
 	return $error;
 }
 

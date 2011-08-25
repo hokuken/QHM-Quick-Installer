@@ -24,7 +24,7 @@ if (preg_match_all($ptn, $installer_src, $mts))
 	}
 	file_put_contents('tmp.php', $installer_src);
 }
-
+system('cp tmp.php install2.php');
 system('php -w tmp.php > install.php');
 unlink('tmp.php');
 
