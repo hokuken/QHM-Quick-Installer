@@ -34,7 +34,7 @@ if ((intval(phpversion()) > 4) && function_exists('stream_get_wrappers') && in_a
 	}
 }
 define('ENSMALL_CLUB_HTTP_SCHEME', $scheme);
-define('ENSMALL_CLUB_URL',    ENSMALL_CLUB_HTTP_SCHEME. '://ensmall.net/club_dev/');
+define('ENSMALL_CLUB_URL',    ENSMALL_CLUB_HTTP_SCHEME. '://ensmall.net/club/');
 define('ENSMALL_PRODUCT_URL', ENSMALL_CLUB_HTTP_SCHEME. '://ensmall.net/hkn_p/');
 
 define('ENSMALL_STATUS_SUCCESS', 101);
